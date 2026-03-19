@@ -1,61 +1,109 @@
-# Welcome to your OnSpace project
+# 🚀 FounderMatch
 
-## How can I edit this code?
+FounderMatch is an AI-powered matchmaking platform that connects startup founders with investors — similar to a dating app, but for funding and collaboration.
 
-There are several ways of editing your application.
+🔗 Live Demo: https://founder-match-mrabs1o62-rama542s-projects.vercel.app/
 
-**Use OnSpace**
+---
 
-Simply visit the [OnSpace Project]() and start prompting.
+## 📌 About the Project
 
-Changes made via OnSpace will be committed automatically to this repo.
+FounderMatch helps users:
 
-**Use your preferred IDE**
+- Discover potential investors or founders
+- Swipe and match like a dating app
+- Chat after matching
+- Get AI-based evaluation scores
+- Simulate investor-founder conversations
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in OnSpace.
+The idea is inspired by combining:
+👉 Tinder-style matching  
+👉 LinkedIn-style networking  
+👉 AI-powered evaluation  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## ✨ Features
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🔐 Authentication
+- Signup / Login system
+- Role-based users:
+  - Founder
+  - Investor
+- Local storage-based login persistence
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 🔍 Discover (Swipe System)
+- Swipe right → Match
+- Swipe left → Pass
+- Smart UI animations
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+### 🤝 Matching System
+- Founder ↔ Investor matching
+- Real-time match notification
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+### 💬 Chat System
+- Simulated AI chat between users
+- Investor / Founder persona-based replies
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+### ⚡ AI Interview System
+- Investors take an AI interview
+- AI evaluates based on:
+  - Experience
+  - Clarity
+  - Founder friendliness
+  - Decision speed
 
-This project is built with:
+➡️ Generates a **Investor Quality Score (1–100)**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+### 📊 Startup Scoring
+- AI-based evaluation of startups:
+  - Market potential
+  - Team strength
+  - Problem clarity
+  - Overall score
 
-Simply open [OnSpace]() and click on Share -> Publish.
+---
+
+### 📊 Dashboard
+- Matches overview
+- Score insights
+- Chat access
+- Activity stats
+
+---
+
+### 👤 Profile
+- User profile with badges
+- Role-based UI (Founder / Investor)
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React (Vite)
+- JavaScript (ES6+)
+- Inline CSS styling
+
+### AI Integration
+- Google Gemini API (or Claude / OpenAI configurable)
+
+### Storage
+- LocalStorage (for authentication)
+
+### Deployment
+- Vercel
+
+---
+
+## 📁 Project Structure
