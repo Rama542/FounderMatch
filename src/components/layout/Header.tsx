@@ -1,17 +1,12 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Zap, LayoutDashboard, Repeat2, MessageSquare, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Zap, LayoutDashboard, Repeat2, MessageSquare, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { UserButton } from '@clerk/react';
 import { cn } from '@/lib/utils';
 
 export default function Header() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
-
-  function handleLogout() {
-    logout();
-    navigate('/');
-  }
 
   const navLinks = user
     ? [
@@ -75,12 +70,7 @@ export default function Header() {
                     {user.role === 'founder' ? 'Founder' : 'Investor'}
                   </span>
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
+                <UserButton afterSignOutUrl="/" />
               </>
             ) : (
               <>

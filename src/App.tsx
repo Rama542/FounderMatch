@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { useUser } from '@clerk/react';
 import Header from '@/components/layout/Header';
 import Landing from '@/pages/Landing';
 import Auth from '@/pages/Auth';
@@ -11,6 +12,17 @@ import AIInterview from '@/pages/AIInterview';
 import Profile from '@/pages/Profile';
 import NotFound from '@/pages/NotFound';
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoaded, isSignedIn } = useUser();
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-[#0a0a0f]" />;
+  }
+  if (!isSignedIn) {
+    return <Navigate to="/auth" replace />;
+  }
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -19,12 +31,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="/ai-interview" element={<AIInterview />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
+          <Route path="/matches" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
+          <Route path="/ai-interview" element={<ProtectedRoute><AIInterview /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

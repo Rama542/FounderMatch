@@ -1,27 +1,55 @@
-import { useState, useEffect } from 'react';
-import type { User } from '@/types';
-import { getCurrentUser, setCurrentUser as saveCurrentUser, logout as authLogout } from '@/lib/auth';
+import { useUser, useClerk } from '@clerk/react';
+import { useEffect, useState } from 'react';
+import type { User, UserRole } from '@/types';
+
+type AppData = { role: UserRole; profileComplete: boolean };
+
+function appDataKey(id: string) {
+  return `fm_app_${id}`;
+}
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(() => getCurrentUser());
+  const { user: clerk, isLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
+  const [user, setUserState] = useState<User | null>(null);
 
   useEffect(() => {
-    const handle = () => setUser(getCurrentUser());
-    window.addEventListener('auth-change', handle);
-    return () => window.removeEventListener('auth-change', handle);
-  }, []);
+    if (!isLoaded) return;
+    if (!isSignedIn || !clerk) {
+      setUserState(null);
+      return;
+    }
 
-  function setUser2(u: User | null) {
-    if (u) saveCurrentUser(u);
-    setUser(u);
+    const raw = localStorage.getItem(appDataKey(clerk.id));
+    const data: Partial<AppData> = raw ? JSON.parse(raw) : {};
+
+    setUserState({
+      id: clerk.id,
+      email: clerk.primaryEmailAddress?.emailAddress ?? '',
+      name: clerk.fullName ?? clerk.firstName ?? '',
+      role: data.role ?? 'founder',
+      profileComplete: data.profileComplete ?? false,
+      avatar: clerk.imageUrl ?? undefined,
+      createdAt: (clerk.createdAt ?? new Date()).toISOString(),
+    });
+  }, [isLoaded, isSignedIn, clerk]);
+
+  function setUser(u: User | null) {
+    if (!clerk || !u) {
+      setUserState(null);
+      return;
+    }
+    const data: AppData = { role: u.role, profileComplete: u.profileComplete };
+    localStorage.setItem(appDataKey(clerk.id), JSON.stringify(data));
+    setUserState(u);
     window.dispatchEvent(new Event('auth-change'));
   }
 
-  function logout() {
-    authLogout();
-    setUser(null);
+  async function logout() {
+    await signOut();
+    setUserState(null);
     window.dispatchEvent(new Event('auth-change'));
   }
 
-  return { user, setUser: setUser2, logout };
+  return { user, isLoaded, setUser, logout };
 }

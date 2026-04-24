@@ -1,54 +1,43 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, User, ChevronRight, Rocket, LineChart } from 'lucide-react';
-import { login, register } from '@/lib/auth';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import type { UserRole } from '@/types';
+import { Zap } from 'lucide-react';
+import { SignIn, SignUp } from '@clerk/react';
+
+const clerkAppearance = {
+  variables: {
+    colorBackground: '#12121a',
+    colorPrimary: '#7c3aed',
+    colorText: '#ffffff',
+    colorTextSecondary: '#94a3b8',
+    colorInputBackground: 'rgba(255,255,255,0.04)',
+    colorInputText: '#ffffff',
+    colorInputPlaceholder: '#64748b',
+    borderRadius: '0.75rem',
+    fontFamily: 'inherit',
+  },
+  elements: {
+    card: 'bg-transparent shadow-none border-0 !p-0',
+    rootBox: 'w-full',
+    socialButtonsBlockButton: '!border-white/[0.08] !bg-white/[0.04] !text-white hover:!bg-white/[0.08]',
+    formButtonPrimary: '!bg-gradient-to-r !from-violet-600 !to-purple-600',
+    footerActionLink: '!text-violet-400 hover:!text-violet-300',
+    formFieldInput: '!border-white/[0.08] !bg-white/[0.04] !text-white',
+    formFieldLabel: '!text-slate-400',
+    dividerLine: '!bg-white/[0.08]',
+    dividerText: '!text-slate-500',
+    headerTitle: '!text-white',
+    headerSubtitle: '!text-slate-400',
+    footer: '!bg-transparent',
+    main: '!gap-4',
+  },
+};
 
 export default function Auth() {
   const [params] = useSearchParams();
   const [mode, setMode] = useState<'login' | 'register'>(
     params.get('mode') === 'register' ? 'register' : 'login'
   );
-  const [role, setRole] = useState<UserRole>('founder');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const { setUser } = useAuth();
-  const navigate = useNavigate();
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-
-    setTimeout(() => {
-      if (mode === 'login') {
-        const user = login(email, password);
-        if (user) {
-          setUser(user);
-          toast.success(`Welcome back, ${user.name}!`);
-          navigate(user.profileComplete ? '/dashboard' : '/onboarding');
-        } else {
-          toast.error('Invalid credentials. Try registering first.');
-        }
-      } else {
-        if (!name.trim()) {
-          toast.error('Please enter your name.');
-          setLoading(false);
-          return;
-        }
-        const user = register(email, name, role);
-        setUser(user);
-        toast.success('Account created! Let\'s set up your profile.');
-        navigate('/onboarding');
-      }
-      setLoading(false);
-    }, 800);
-  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 py-20">
@@ -72,122 +61,36 @@ export default function Auth() {
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-[#12121a] p-8">
-          <h1 className="text-2xl font-black text-white mb-1">
-            {mode === 'login' ? 'Welcome back' : 'Create your account'}
-          </h1>
-          <p className="text-sm text-slate-500 mb-8">
-            {mode === 'login'
-              ? 'Sign in to continue matching'
-              : 'Join the smartest funding platform'}
-          </p>
-
-          {/* Mode toggle */}
-          <div className="flex rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 mb-6">
-            {(['login', 'register'] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
-                  mode === m
-                    ? 'bg-violet-600 text-white shadow-lg'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                {m === 'login' ? 'Sign In' : 'Register'}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'register' && (
-              <>
-                {/* Role selection */}
-                <div className="grid grid-cols-2 gap-3 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setRole('founder')}
-                    className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
-                      role === 'founder'
-                        ? 'border-violet-500 bg-violet-500/10 text-violet-300'
-                        : 'border-white/[0.08] bg-white/[0.02] text-slate-500 hover:border-white/[0.15]'
-                    }`}
-                  >
-                    <Rocket className="h-5 w-5" />
-                    <span className="text-sm font-semibold">I'm a Founder</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole('investor')}
-                    className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
-                      role === 'investor'
-                        ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                        : 'border-white/[0.08] bg-white/[0.02] text-slate-500 hover:border-white/[0.15]'
-                    }`}
-                  >
-                    <LineChart className="h-5 w-5" />
-                    <span className="text-sm font-semibold">I'm an Investor</span>
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-all"
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-all"
-              />
-            </div>
-
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-all"
-              />
-            </div>
-
+        {/* Mode toggle */}
+        <div className="flex rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 mb-4">
+          {(['login', 'register'] as const).map((m) => (
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-60 transition-all hover:scale-[1.02]"
+              key={m}
+              onClick={() => setMode(m)}
+              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                mode === m
+                  ? 'bg-violet-600 text-white shadow-lg'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
             >
-              {loading ? (
-                <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              ) : (
-                <>
-                  {mode === 'login' ? 'Sign In' : 'Create Account'}
-                  <ChevronRight className="h-4 w-4" />
-                </>
-              )}
+              {m === 'login' ? 'Sign In' : 'Register'}
             </button>
-          </form>
+          ))}
+        </div>
 
-          {mode === 'login' && (
-            <p className="mt-6 text-center text-xs text-slate-600">
-              Demo: register with any email/password to get started
-            </p>
+        <div className="rounded-2xl border border-white/[0.08] bg-[#12121a] p-6">
+          {mode === 'login' ? (
+            <SignIn
+              appearance={clerkAppearance}
+              afterSignInUrl="/dashboard"
+              routing="hash"
+            />
+          ) : (
+            <SignUp
+              appearance={clerkAppearance}
+              afterSignUpUrl="/onboarding"
+              routing="hash"
+            />
           )}
         </div>
       </motion.div>

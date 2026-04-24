@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Check, Zap } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, Zap, Rocket, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { saveFounderProfile, saveInvestorProfile, generateStartupScores } from '@/lib/mockData';
-import { updateUserProfile } from '@/lib/auth';
 import { INDUSTRIES, STARTUP_STAGES, INDUSTRY_ICONS } from '@/constants/data';
 import { toast } from 'sonner';
-import type { StartupProfile, InvestorProfile, Industry, StartupStage } from '@/types';
+import type { StartupProfile, InvestorProfile, Industry, StartupStage, UserRole } from '@/types';
 import { cn } from '@/lib/utils';
 
 export default function Onboarding() {
@@ -36,12 +35,15 @@ export default function Onboarding() {
   const [selStages, setSelStages] = useState<StartupStage[]>([]);
   const [portfolio, setPortfolio] = useState('');
 
+  const [roleChosen, setRoleChosen] = useState(false);
+  const [localRole, setLocalRole] = useState<UserRole>('founder');
+
   if (!user) {
     navigate('/auth');
     return null;
   }
 
-  const isFounder = user.role === 'founder';
+  const isFounder = localRole === 'founder';
 
   const founderSteps = [
     { title: 'Startup Basics', subtitle: 'Tell us about your company' },
@@ -115,8 +117,7 @@ export default function Onboarding() {
         };
         saveInvestorProfile(profile);
       }
-      const updated = updateUserProfile({ profileComplete: true });
-      setUser(updated);
+      setUser({ ...user!, role: localRole, profileComplete: true });
       toast.success('Profile created! AI is scoring your profile...');
       navigate('/dashboard');
       setLoading(false);
@@ -132,6 +133,67 @@ export default function Onboarding() {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-lg"
       >
+        {!roleChosen && (
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-700">
+                <Zap className="h-4 w-4 text-white" fill="white" />
+              </div>
+              <span className="font-space text-lg font-bold text-white">
+                Founder<span className="text-violet-400">Match</span>
+              </span>
+            </div>
+            <h1 className="text-2xl font-black text-white mb-1">Who are you?</h1>
+            <p className="text-sm text-slate-500 mb-8">Choose your role to personalise your experience</p>
+            <div className="rounded-2xl border border-white/[0.08] bg-[#12121a] p-8">
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <button
+                  type="button"
+                  onClick={() => setLocalRole('founder')}
+                  className={`flex flex-col items-center gap-3 rounded-xl border p-6 transition-all ${
+                    localRole === 'founder'
+                      ? 'border-violet-500 bg-violet-500/10 text-violet-300'
+                      : 'border-white/[0.08] bg-white/[0.02] text-slate-500 hover:border-white/[0.15]'
+                  }`}
+                >
+                  <Rocket className="h-7 w-7" />
+                  <div>
+                    <div className="text-sm font-semibold">I'm a Founder</div>
+                    <div className="text-xs text-slate-500 mt-0.5">Raise funding</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocalRole('investor')}
+                  className={`flex flex-col items-center gap-3 rounded-xl border p-6 transition-all ${
+                    localRole === 'investor'
+                      ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                      : 'border-white/[0.08] bg-white/[0.02] text-slate-500 hover:border-white/[0.15]'
+                  }`}
+                >
+                  <LineChart className="h-7 w-7" />
+                  <div>
+                    <div className="text-sm font-semibold">I'm an Investor</div>
+                    <div className="text-xs text-slate-500 mt-0.5">Discover startups</div>
+                  </div>
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  setUser({ ...user!, role: localRole });
+                  setRoleChosen(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all"
+              >
+                Continue
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {roleChosen && (
+        <>
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -378,6 +440,8 @@ export default function Onboarding() {
             </button>
           </div>
         </div>
+        </>
+        )}
       </motion.div>
     </div>
   );
